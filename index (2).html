@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Notice Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f8f9ff;--ink:#121c2a;--dark:#002921;--deep:#153f36;--green:#136b56;--mint:#a3f2d8;--mintt:#1d715c;--s1:#eff4ff;--s2:#e6eeff;--s3:#dee9fc;--s4:#d9e3f6;--txt:#414846;--mut:#717976;--red:#ba1a1a;--redbg:#ffdad6;--redt:#93000a;--sh:0 1px 1px rgba(0,0,0,.05);--sh2:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--txt);font-size:15px;line-height:24px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+a{color:inherit;text-decoration:none}
+.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;font-size:18px;line-height:1;display:inline-block;letter-spacing:normal;text-transform:none;white-space:nowrap;direction:ltr;vertical-align:middle;font-feature-settings:'liga'}
+.ms.s{font-size:14px}.ms.xs{font-size:12px}.ms.l{font-size:22px}
+.view{display:none}.view.active{display:block}
+.mono{font-family:'Liberation Mono',ui-monospace,monospace;font-weight:700}
+.row{display:flex;align-items:center}.between{justify-content:space-between}.gap4{gap:4px}.gap8{gap:8px}.gap16{gap:16px}.col{display:flex;flex-direction:column}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:9999px;font-size:11px;line-height:14px;font-weight:700;letter-spacing:.55px;text-transform:uppercase;background:var(--mint);color:var(--mintt);white-space:nowrap}
+.pill.red{background:var(--redbg);color:var(--redt)}.pill.blue{background:var(--s3);color:var(--txt)}.pill.sage{background:#d6e6dd;color:#3c4a43}.pill.sm{padding:2px 8px;letter-spacing:.44px}.pill.dk{background:var(--dark);color:#fff}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;flex:none}.dot.r{background:var(--red)}
+.card{background:#fff;border-radius:12px;box-shadow:var(--sh)}
+.lbl{font-size:11px;line-height:14px;font-weight:700;letter-spacing:.55px;text-transform:uppercase;color:var(--txt)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:8px;font-weight:600;font-size:14px;line-height:20px;letter-spacing:.14px}
+.btn.dk{background:var(--dark);color:#fff;box-shadow:var(--sh)}.btn.lt{background:var(--s3);color:var(--dark);font-weight:700}
+.eyebrow{font-size:11px;line-height:14px;font-weight:700;letter-spacing:.55px;text-transform:uppercase;color:var(--green)}
+h1{font-size:32px;line-height:40px;letter-spacing:-.8px;color:var(--dark);font-weight:700}
+h2,h3{color:var(--ink);font-weight:700}
+
+/* ===== LOGIN ===== */
+#login{min-height:100vh;display:none;flex-direction:column;justify-content:space-between}
+#login.active{display:flex}
+.lg-head{display:flex;justify-content:space-between;align-items:center;padding:40px}
+.brand{display:flex;align-items:center;gap:8px}
+.brand img{height:32px;width:auto}
+.brand b{font-size:20px;line-height:28px;letter-spacing:-.5px;color:var(--dark)}
+.lg-head small{font-size:14px;font-weight:600;color:var(--txt);display:flex;gap:4px;align-items:center}
+.lg-main{padding:64px 40px;display:flex;justify-content:center}
+.bento{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;width:100%;max-width:1152px;align-items:start}
+.lg-left{grid-column:1/span 7;background:var(--deep);border-radius:12px;padding:40px;min-height:750px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1)}
+.glow{position:absolute;border-radius:50%;filter:blur(32px);pointer-events:none}
+.lg-left>*{position:relative}
+.live{display:inline-flex;align-items:center;gap:4px;background:rgba(0,41,33,.4);backdrop-filter:blur(6px);padding:4px 8px;border-radius:9999px;color:var(--mint);font-size:11px;font-weight:700;letter-spacing:.55px;line-height:14px}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--mint)}
+.mock{display:flex;flex-direction:column;gap:6px;align-items:flex-end;padding:10px 0}
+.nc{background:#fff;border-radius:12px;padding:16px;width:min(582px,100%);position:relative;display:flex;flex-direction:column;gap:4px;box-shadow:0 10px 15px -3px rgba(0,0,0,.1)}
+.nc.a{transform:rotate(-1deg)}.nc.b{background:var(--s1);width:min(550px,94%);transform:rotate(1deg);box-shadow:0 4px 6px -1px rgba(0,0,0,.1)}
+.nc h4{font-size:16px;line-height:24px;letter-spacing:-.08px;color:var(--dark)}
+.nc p{font-size:13px;line-height:20px}
+.nc small{font-size:12px;font-weight:600;letter-spacing:.24px;line-height:16px}
+.ribbon{position:absolute;right:24px;top:-10px;background:var(--redbg);color:var(--redt);padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:700;letter-spacing:.44px;display:flex;align-items:center;gap:4px;line-height:14px}
+.lg-foot-stats{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-top:16px;color:#fff;font-size:12px;font-weight:600}
+.lg-foot-stats span span{color:#80aa9e}
+.lg-right{grid-column:8/span 5;background:#fff;border-radius:12px;padding:40px;box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1)}
+.lg-right h1{margin-bottom:4px}
+.tabs3{background:var(--s1);padding:4px;border-radius:8px;display:flex;gap:4px;margin-top:4px}
+.tabs3 button{flex:1;display:flex;gap:4px;align-items:center;justify-content:center;padding:8px;border-radius:6px;font-size:14px;font-weight:600;letter-spacing:.14px;line-height:20px;color:var(--txt)}
+.tabs3 button.on{background:var(--dark);color:#fff;box-shadow:var(--sh)}
+.fld{display:flex;flex-direction:column;gap:6px;margin-top:16px}
+.fld label{font-size:14px;font-weight:600;color:var(--ink);letter-spacing:.14px;line-height:20px}
+.inw{position:relative}
+.inw .ms{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--mut)}
+.inw input{width:100%;height:48px;border-radius:8px;border:2px solid transparent;background:var(--s1);padding:0 16px 0 44px;font-size:15px;outline:0}
+.inw input::placeholder{color:var(--mut)}
+.inw input:focus{border-color:var(--green);background:#fff}
+.cta{margin-top:20px;width:100%;height:48px;border-radius:8px;background:var(--dark);color:#fff;font-weight:700;letter-spacing:.35px;font-size:14px;display:flex;gap:8px;justify-content:center;align-items:center;box-shadow:var(--sh2)}
+.cta:disabled{opacity:.6;cursor:wait}
+.msg{margin-top:12px;font-size:13px;font-weight:600;border-radius:8px;padding:10px 12px;display:none}
+.msg.ok{display:block;background:var(--mint);color:var(--dark)}.msg.err{display:block;background:var(--redbg);color:var(--redt)}
+.reg{margin-top:24px;background:rgba(239,244,255,.5);border-radius:8px;padding:16px 8px 8px;display:inline-flex;gap:2px;align-items:center;font-weight:700;color:var(--dark);font-size:14px}
+.lg-foot{text-align:center;padding:16px;font-size:12px;font-weight:600;letter-spacing:.24px}
+
+/* ===== DASHBOARD SHELL ===== */
+.dash{padding-left:256px;min-height:100vh;position:relative}
+.aside{position:fixed;left:0;top:0;bottom:0;width:256px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.04);display:flex;flex-direction:column;justify-content:space-between;z-index:30}
+.aside .brand{padding:24px 24px;gap:8px}.aside .brand b{font-size:16px;letter-spacing:-.08px;font-weight:600}
+.aside .sec{padding:10px 24px 8px}
+.aside nav{padding:0 16px;display:flex;flex-direction:column;gap:4px}
+.aside nav a,.aside .out a{display:block;padding:8px 16px;border-radius:12px;font-size:15px;color:var(--txt);cursor:pointer}
+.aside nav a.on{background:var(--deep);color:#fff;font-size:16px}
+.aside .out{padding:16px}
+.hdr{position:fixed;top:0;left:256px;right:0;height:64px;background:rgba(248,249,255,.8);backdrop-filter:blur(12px);box-shadow:0 1px 8px rgba(0,0,0,.04);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:20;gap:24px}
+.hsearch{position:relative;flex:1;max-width:512px}
+.hsearch input{width:100%;height:40px;border:0;border-radius:8px;background:#fff;padding:0 16px 0 40px;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,.03);outline:0}
+.hsearch .ms{position:absolute;left:12px;top:11px;font-size:16px;color:var(--txt)}
+.hr{display:flex;align-items:center;gap:16px}
+.bell{position:relative;padding:8px;border-radius:50%}
+.bell i{position:absolute;right:6px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--red)}
+.bell.g i{background:var(--green)}
+.who{text-align:right;font-weight:700;color:var(--ink);font-size:14px;line-height:17.5px;letter-spacing:.14px}
+.who small{display:block;font-size:11px;line-height:14px;letter-spacing:.44px;color:var(--txt)}
+.av{width:32px;height:32px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px rgba(0,41,33,.1);background:var(--s4);flex:none}
+.dmain{padding:64px 40px 40px;min-height:800px}
+.ctr{max-width:944px;margin:0 auto}
+
+/* Student */
+.sh{display:flex;justify-content:space-between;align-items:flex-end;padding:24px 0 16px;flex-wrap:wrap;gap:16px}
+.sh .meta{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px;font-weight:600;letter-spacing:.24px}
+.stats{background:var(--s1);display:flex;gap:8px;padding:6px;border-radius:12px;flex-wrap:wrap}
+.stat{background:#fff;border-radius:8px;padding:8px 12px;display:flex;gap:8px;align-items:center;box-shadow:var(--sh)}
+.stat b{display:block;font-size:16px;line-height:20px;color:var(--dark);letter-spacing:-.08px}
+.stat .lbl{display:block}
+.urgent{margin:16px 0;background:#fff;border-left:5px solid var(--red);border-radius:12px;padding:24px;box-shadow:var(--sh2);display:flex;justify-content:space-between;gap:16px;align-items:center;position:relative;overflow:hidden;flex-wrap:wrap}
+.urgent .ic{width:48px;height:48px;border-radius:12px;background:var(--redbg);display:flex;align-items:center;justify-content:center;color:var(--red);flex:none}
+.urgent h2{font-size:20px;line-height:28px;letter-spacing:-.2px;margin:4px 0}
+.urgent p{font-size:15px;max-width:620px}
+.tabbar{padding:8px 0 24px}
+.tabrow{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--s4);padding-bottom:5px;flex-wrap:wrap;gap:8px}
+.tab{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;font-size:15px;color:var(--txt)}
+.tab.on{background:var(--deep);color:#fff;font-weight:600;font-size:16px;box-shadow:var(--sh)}
+.cnt{padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:700;line-height:14px;background:var(--mint);color:#002018}
+.tab:not(.on) .cnt{background:var(--s3);color:var(--txt);padding:0 6px}.tab.u .cnt{background:var(--redbg);color:var(--redt)}.tab.n .cnt{background:var(--mint);color:var(--mintt)}
+.chips{display:flex;gap:4px;align-items:center;overflow:auto;padding:4px 0;margin-top:16px}
+.chip{padding:6px 14px;border-radius:9999px;background:#fff;font-size:14px;font-weight:600;line-height:20px;color:var(--ink);box-shadow:var(--sh);white-space:nowrap}
+.chip.on{background:var(--dark);color:#fff}
+.grid12{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px}
+.l8{grid-column:1/span 8}.r4{grid-column:9/span 4}
+.nstat{padding:8px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.ncards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ncard{padding:16px;display:flex;flex-direction:column;justify-content:space-between;min-height:257px}
+.ncard h3{font-size:20px;line-height:27.5px;letter-spacing:-.2px;margin-top:4px}
+.ncard p{font-size:15px;margin-top:4px}
+.tag{display:inline-block;margin-top:8px;background:var(--s2);color:var(--green);font-size:12px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.24px;line-height:16px}
+.nfoot{border-top:1px solid var(--s3);margin-top:16px;padding-top:9px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ini{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex:none;object-fit:cover}
+.who2{font-size:12px;font-weight:700;color:var(--ink);line-height:16px;letter-spacing:.24px;white-space:nowrap}
+.who2 small{display:block;font-size:11px;line-height:14px;color:var(--txt);letter-spacing:.44px}
+.rd{background:var(--s2);color:var(--dark);font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;letter-spacing:.24px}
+.pg{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;margin-top:16px;font-size:13px;flex-wrap:wrap;gap:8px}
+.pg .nums{display:flex;gap:4px;align-items:center}
+.pg .nums button{padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;color:var(--ink)}
+.pg .nums .on{background:var(--dark);color:#fff;font-weight:700}
+.panel{padding:16px;margin-bottom:16px}
+.ph{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--s3);padding-bottom:5px;margin-bottom:8px;gap:8px}
+.ph h2{font-size:16px;line-height:24px;letter-spacing:-.08px;display:flex;gap:8px;align-items:center}
+.flash{background:var(--s1);border-left:3px solid var(--red);border-radius:8px;padding:12px 12px 12px 15px;margin-bottom:8px}
+.flash .t{display:flex;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:.44px;line-height:14px;color:var(--red)}
+.flash .t span:last-child{font-weight:400;color:var(--txt)}
+.flash h4{font-size:14px;line-height:17.5px;margin:4px 0;color:var(--ink);letter-spacing:.14px}
+.flash p{font-size:13px;line-height:20px}
+.dn{padding:10px;border-radius:8px;margin-bottom:4px}
+.dn .t{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--green);letter-spacing:.44px;line-height:14px}
+.dn .t span:last-child{font-weight:400;font-size:13px;color:var(--txt);letter-spacing:0}
+.dn h4{font-size:14px;line-height:20px;color:var(--ink);letter-spacing:.14px}.dn p{font-size:13px;line-height:20px}
+.notif{display:flex;gap:8px;padding:8px;border-radius:8px}
+.notif.rd2{opacity:.75}.notif i{width:10px;height:10px;border-radius:50%;background:var(--green);margin-top:6px;flex:none}.notif.rd2 i{background:#c0c8c4}
+.notif h4{font-size:14px;line-height:17.5px;color:var(--ink);letter-spacing:.14px}.notif p{font-size:13px;line-height:20px}.notif small{font-size:11px;font-weight:700;letter-spacing:.44px}
+.help{background:var(--dark);color:#fff;border-radius:12px;padding:16px;box-shadow:var(--sh2)}
+.help p{color:#80aa9e;font-size:13px;line-height:20px;margin:4px 0}
+.help h4{font-size:16px;color:#fff}
+
+/* Faculty */
+.fstats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:24px}
+.fs{padding:16px}
+.fs .lbl{letter-spacing:.6px;font-weight:600;font-size:12px;line-height:16px}
+.fs .v{display:flex;align-items:baseline;gap:4px;margin-top:4px}
+.fs .v b{font-size:32px;line-height:40px;font-weight:800;color:var(--dark);letter-spacing:-.64px}
+.fs .v small{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.44px;line-height:14px}
+.fs .v small.n{color:var(--txt);font-weight:400}
+.l7{grid-column:1/span 7}.r5{grid-column:8/span 5}
+.fhead{background:var(--s1);margin:0 -24px;padding:24px 24px 16px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.fico{width:32px;height:32px;border-radius:8px;background:var(--deep);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.fhead h2{font-size:16px;line-height:20px;color:var(--dark);letter-spacing:-.08px}
+.fhead p{font-size:13px;line-height:20px}
+.chip2{background:var(--mint);color:#005140;padding:4px 8px;border-radius:9999px;font-size:11px;font-weight:700;letter-spacing:.55px;text-transform:uppercase;line-height:14px}
+.fform{padding:0 0 24px;display:flex;flex-direction:column;gap:16px}
+.ff label,.ff .lb{font-size:14px;font-weight:600;color:var(--dark);letter-spacing:.14px;line-height:20px;display:flex;justify-content:space-between;margin-bottom:4px}
+.ff input[type=text],.ff select,.ff textarea{width:100%;background:var(--bg);border:0;border-radius:8px;padding:9px 16px;font-size:15px;box-shadow:0 1px 2px rgba(0,0,0,.05);outline:0}
+.ff textarea{min-height:140px;line-height:24.4px;resize:vertical}
+.ff select{appearance:none;-webkit-appearance:none}
+.ff .sel{position:relative}.ff .sel .ms{position:absolute;right:12px;top:10px;pointer-events:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.req{color:var(--red)}
+.opts{display:flex;gap:4px}.opts.p{gap:8px}
+.opts button{flex:1;padding:8px;border-radius:8px;background:var(--s2);font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.24px;line-height:16px}
+.opts button.on{background:var(--deep);color:#fff}
+.opts.p button{display:flex;gap:4px;align-items:center;background:var(--bg);text-align:left;font-size:14px;font-weight:700;line-height:14px}
+.opts.p button small{display:block;font-size:11px;opacity:.8;letter-spacing:.44px}
+.opts.p button.on{background:var(--mint);color:#002018}
+.tb{display:flex;gap:4px;background:var(--s2);padding:2px 4px;border-radius:8px;font-weight:700}
+.att{background:var(--s1);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.file{background:#fff;border-radius:8px;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--sh)}
+.file .fi{width:36px;height:36px;border-radius:4px;background:var(--redbg);color:var(--red);display:flex;align-items:center;justify-content:center}
+.drop{background:var(--s2);border-radius:8px;padding:16px;display:flex;gap:8px;justify-content:center;align-items:center;font-size:13px;line-height:20px;text-align:center;cursor:pointer}
+.sched{background:var(--s1);border-radius:12px;padding:16px 16px 20px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sw{width:44px;height:24px;border-radius:9999px;background:var(--s4);position:relative;flex:none;transition:.2s}
+.sw::after{content:"";position:absolute;left:2px;top:2px;width:20px;height:20px;border-radius:50%;background:#fff;border:1px solid #d1d5db;transition:.2s}
+.sw.on{background:var(--green)}.sw.on::after{left:22px}
+.acts{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding-top:8px}
+.spot{background:var(--deep);border-radius:12px;padding:16px;margin-top:16px;display:flex;gap:16px;box-shadow:0 1px 2px rgba(0,0,0,.05);color:#fff}
+.spot .c{width:40px;height:40px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex:none}
+.spot h4{font-size:16px;line-height:20px;letter-spacing:-.08px}.spot p{font-size:13px;line-height:20px;color:#80aa9e;padding-top:4px}
+.mh{padding:16px;margin-bottom:16px}
+.seg{background:var(--s2);padding:4px;border-radius:8px;display:flex;gap:4px;flex:none}
+.seg button{padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;color:var(--txt);line-height:16px;letter-spacing:.24px}
+.seg button.on{background:#fff;color:var(--dark);font-weight:700;box-shadow:var(--sh)}
+.sinp{position:relative;margin-top:8px}
+.sinp input{width:100%;background:var(--s1);border:0;border-radius:8px;padding:6px 16px 6px 36px;font-size:13px;box-shadow:inset 0 2px 4px rgba(0,0,0,.05);outline:0}
+.sinp .ms{position:absolute;left:12px;top:7px;font-size:14px}
+.nt{background:#fff;border-radius:12px;padding:16px;box-shadow:var(--sh);margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.nt h4{font-size:14px;line-height:20px;color:var(--dark);letter-spacing:.14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nt p{font-size:13px;line-height:20px}
+.nt .f{display:flex;justify-content:space-between;align-items:center;padding-top:4px;font-size:11px;font-weight:700;letter-spacing:.44px;color:var(--txt)}
+.nt .top{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;color:var(--txt);letter-spacing:.44px}
+.ib{padding:4px;border-radius:4px;color:var(--txt);display:inline-flex}
+.ib:hover{background:var(--s2)}
+.hf{display:flex;justify-content:space-between;align-items:center;padding-top:16px;font-size:11px;font-weight:700;letter-spacing:.44px}
+.hf a{color:var(--green);font-size:12px;letter-spacing:.24px;display:flex;gap:4px;align-items:center;cursor:pointer}
+
+/* Admin */
+.top{display:flex;justify-content:space-between;align-items:flex-end;padding:24px 0;gap:24px;flex-wrap:wrap}
+.top p{max-width:430px;margin-top:4px}
+.syn{display:inline-flex;align-items:center;gap:8px;background:var(--mint);color:var(--dark);padding:6px 12px;border-radius:9999px;font-size:12px;font-weight:600;letter-spacing:.24px;margin-bottom:8px}
+.km{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:40px}
+.kc{padding:24px;position:relative;overflow:hidden;min-height:216px;display:flex;flex-direction:column;justify-content:space-between}
+.kc .big{font-size:40px;line-height:48px;font-weight:800;color:var(--dark);letter-spacing:-.8px;margin-top:4px}
+.kc .ico{width:40px;height:40px;border-radius:8px;background:var(--s2);color:var(--dark);display:flex;align-items:center;justify-content:center}
+.kc .ft{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.44px;display:flex;gap:12px;align-items:center;line-height:14px;flex-wrap:wrap}
+.kc .ft span.n{font-weight:400;color:var(--txt);font-size:13px;line-height:20px}
+.kc.red .big{color:var(--red)}
+.kc .blob{position:absolute;right:-24px;bottom:-24px;width:96px;height:96px;border-radius:50%;background:rgba(255,218,214,.5)}
+.mod{background:#fff;border-radius:12px;box-shadow:var(--sh);padding:24px;margin-bottom:40px}
+.mod.n{background:none;box-shadow:none;padding:0}
+.mh2{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px;gap:16px;flex-wrap:wrap}
+.mh2 .k{font-size:11px;font-weight:700;letter-spacing:.55px;text-transform:uppercase;color:var(--green);display:flex;gap:4px;align-items:center;line-height:14px}
+.mh2 .k span{font-weight:600;text-transform:none;letter-spacing:.24px;color:var(--txt);font-size:12px}
+.mh2 h2{font-size:32px;line-height:32px;letter-spacing:-.8px;color:var(--dark);margin-top:6px}
+.an{display:grid;grid-template-columns:304px 1fr 224px;gap:16px}
+.ac{background:#fff;border-radius:12px;box-shadow:var(--sh);padding:24px;display:flex;flex-direction:column;justify-content:space-between;gap:16px}
+.mod.an-wrap{padding:0;box-shadow:none;background:none}
+.ac h3{font-size:16px;line-height:24px;letter-spacing:-.08px;display:flex;justify-content:space-between;align-items:center}
+.ac h3 span{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.44px}
+.ac>div>p{font-size:13px;line-height:20px}
+.bar{margin-top:12px}.bar>div{display:flex;justify-content:space-between;font-size:12px;font-weight:600;letter-spacing:.24px;line-height:16px;color:var(--ink)}
+.bar>div b{font-weight:700}.bar i{display:block;height:12px;border-radius:9999px;background:var(--s1);margin-top:4px;overflow:hidden}.bar i s{display:block;height:100%;border-radius:9999px;text-decoration:none}
+.sm2{background:var(--s1);border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;font-size:12px;font-weight:700;line-height:16px;gap:8px}
+.sm2 b:last-child{color:var(--green)}
+.two2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.two2>div{background:var(--s1);border-radius:8px;padding:12px}
+.two2 small{display:block;font-size:11px;font-weight:700;letter-spacing:.44px;text-transform:uppercase;line-height:14px}
+.two2 b{display:block;font-size:18px;line-height:24px;color:var(--dark);margin:4px 0 0}
+.two2 span{font-size:12px;line-height:20px;display:block}
+.meter{background:var(--s1);border-radius:8px;padding:14px;margin-bottom:12px}
+.meter .t{display:flex;justify-content:space-between;align-items:flex-start;font-weight:700;color:var(--ink);font-size:14px;line-height:20px}
+.meter .t b{color:var(--dark);font-size:14px}
+.meter i{display:block;height:8px;border-radius:9999px;background:#fff;margin:8px 0}
+.meter i s{display:block;height:100%;border-radius:9999px;background:var(--deep);text-decoration:none}
+.meter small{font-size:11px;font-weight:700;line-height:14px;letter-spacing:.44px}
+.ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.si{position:relative}.si input{height:36px;width:288px;max-width:100%;border:0;background:var(--s1);border-radius:8px;padding:0 12px 0 40px;font-size:13px;outline:0}
+.si .ms{position:absolute;left:12px;top:9px;font-size:16px}
+.pills{background:var(--s1);border-radius:8px;padding:4px;display:flex;gap:4px}
+.pills button{padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;line-height:16px;color:var(--txt)}
+.pills button.on{background:#fff;color:var(--dark);font-weight:700;box-shadow:var(--sh)}
+.tw{overflow-x:auto;margin-top:16px}
+table{width:100%;border-collapse:collapse;min-width:780px}
+th{background:var(--s1);text-align:left;padding:12px 16px;font-size:11px;font-weight:700;letter-spacing:.55px;text-transform:uppercase;line-height:16px;color:var(--txt)}
+th:last-child{text-align:center}
+td{padding:14px 16px;border-bottom:1px solid var(--s1);font-size:13px;line-height:20px;vertical-align:middle}
+td.u{display:flex;gap:12px;align-items:center}
+td.u b{display:block;font-size:14px;line-height:20px;color:var(--ink);font-weight:700}td.u small{display:block;font-size:11px;font-weight:700;letter-spacing:.44px;line-height:14px}
+td .ini{width:36px;height:36px;object-fit:cover}
+.tf{display:flex;justify-content:space-between;align-items:center;padding-top:16px;font-size:13px;flex-wrap:wrap;gap:8px}
+.tf button{padding:4px 12px;border-radius:6px;background:var(--s1);font-size:12px;font-weight:700;color:var(--dark)}
+.depts{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.dc{background:#fff;border-radius:12px;box-shadow:var(--sh);padding:16px;display:flex;flex-direction:column;justify-content:space-between;min-height:158px;gap:16px}
+.dc h3{font-size:16px;line-height:24px;color:var(--dark);margin-top:8px;letter-spacing:-.08px}.dc p{font-size:13px;line-height:20px}
+.dc .f{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700}.dc .f a{color:var(--green);display:flex;gap:2px;align-items:center;cursor:pointer}
+.dc.add{background:var(--s1);align-items:center;justify-content:center;text-align:center;box-shadow:none}
+.dc.add .p{width:48px;height:48px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh2);margin:0 auto 8px}
+.mt-r td:first-child{font-weight:700}
+.arch{color:var(--green);font-size:12px;font-weight:700;display:flex;gap:4px;align-items:center;cursor:pointer}
+
+/* Responsive */
+@media(max-width:1100px){
+ .an{grid-template-columns:1fr 1fr}.an>:last-child{grid-column:1/-1}
+ .depts,.km{grid-template-columns:repeat(2,1fr)}.fstats{grid-template-columns:repeat(2,1fr)}
+ .l8,.r4,.l7,.r5{grid-column:1/-1}
+}
+@media(max-width:860px){
+ .dash{padding-left:0}
+ .aside{position:static;width:100%;flex-direction:row;align-items:center;flex-wrap:wrap;padding:0 8px}
+ .aside .sec{display:none}.aside nav{flex-direction:row;flex-wrap:wrap;padding:0;flex:1}.aside .brand{padding:12px 16px}
+ .aside .out{padding:8px}
+ .hdr{position:sticky;left:0;margin-top:0}
+ .dmain{padding:24px 16px}
+ .bento{grid-template-columns:1fr}.lg-left,.lg-right{grid-column:1/-1}.lg-left{min-height:0;gap:24px}
+ .lg-main{padding:24px 16px}.lg-head{padding:24px 16px}.lg-right{padding:24px}
+ .ncards,.two,.depts,.km,.an,.fstats{grid-template-columns:1fr}
+ .hsearch{display:none}h1{font-size:26px;line-height:34px}.mh2 h2{font-size:24px;line-height:28px}
+ .nc.a,.nc.b{transform:none}.mock{align-items:stretch}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<section id="login" class="view active">
+  <header class="lg-head">
+    <div class="brand"><img class="logo" alt="" src="https://www.figma.com/api/mcp/asset/ea440a77-2862-4732-b247-0ff71db7440e/00d1a.png" onerror="this.style.display='none'"><b>Smart Notice Board</b></div>
+    <small><span class="ms s">verified</span>Academic Portal</small>
+  </header>
+  <main class="lg-main">
+    <div class="bento">
+      <div class="lg-left">
+        <div class="glow" style="background:#136b56;opacity:.3;width:320px;height:320px;left:-96px;top:-96px"></div>
+        <div class="glow" style="background:#a3f2d8;opacity:.15;width:384px;height:384px;right:-80px;bottom:-80px"></div>
+        <div class="row between"><span class="live"><i></i>LIVE CAMPUS HUB</span><span class="ms s" style="color:var(--mint)">sensors</span></div>
+        <div class="mock">
+          <div class="nc a">
+            <div class="ribbon"><span class="dot r"></span>BROADCAST NOTICE</div>
+            <div class="row between"><div class="row gap4"><span class="pill sm" style="border-radius:4px">DEAN'S OFFICE</span><small>Today, 09:15 AM</small></div><span class="ms" style="color:var(--dark)">push_pin</span></div>
+            <h4>Fall 2024 End-Semester Exam Timetable &amp; Room Matrix Released</h4>
+            <p>The Department of Academic Registry has uploaded the comprehensive schedule. Verify all course slot allocations and report clashes within 48 hours.</p>
+            <div class="row between" style="padding-top:8px"><small class="row gap4"><span class="ms s">verified_user</span>Registrar Council</small><small style="color:var(--green)" class="row gap4">View Annexure<span class="ms xs">arrow_forward</span></small></div>
+          </div>
+          <div class="nc b">
+            <div class="row between"><div class="row gap4"><span class="pill sm" style="border-radius:4px;background:#d6e6dd;color:#111e19">DEPT. OF COMPUTER SCIENCE</span><small>Yesterday</small></div><span class="ms s">push_pin</span></div>
+            <h4 style="color:#182520">Inter-Collegiate AI Research Showcase &amp; Grant Opportunities</h4>
+            <p>Inviting submissions from undergraduate and master's candidates. Final presentation panels will be moderated by faculty advisors and lab fellows.</p>
+            <div class="row between" style="padding-top:8px"><small class="row gap8"><span class="ini" style="background:var(--mint);color:#002018;width:20px;height:20px;font-size:10px">CS</span>Prof. V. Sharma • Turing Hall</small><small class="row gap4"><span class="ms s">attach_file</span>3 PDFs</small></div>
+          </div>
+        </div>
+        <div class="lg-foot-stats"><div class="row gap16"><span class="row gap4"><span class="ms s">campaign</span>14 <span>Active Pins</span></span><span class="row gap4"><span class="ms s">groups</span>4.8k <span>Students Online</span></span></div><span class="row gap4" style="color:var(--mint)">Campus LAN Verified<span class="ms s">verified_user</span></span></div>
+      </div>
+
+      <div class="lg-right">
+        <div class="row between" style="padding-bottom:16px"><img class="logo" alt="" style="height:36px" src="https://www.figma.com/api/mcp/asset/ea440a77-2862-4732-b247-0ff71db7440e/00d1a.png" onerror="this.style.display='none'"><span class="pill"><span class="ms xs">school</span>UNIFIED ACCESS</span></div>
+        <div style="padding-bottom:24px"><h1>Welcome to Smart Notice Board</h1><p>Sign in to access your campus announcements and updates.</p></div>
+        <div>
+          <div class="row between"><span class="lbl">SELECT PORTAL VIEW</span><span id="asRole" style="font-size:12px;font-weight:600;color:var(--green);letter-spacing:.24px;line-height:16px">Logging in as Student</span></div>
+          <div class="tabs3" id="roleTabs">
+            <button type="button" class="on" data-role="student"><span class="ms s">school</span>Student</button>
+            <button type="button" data-role="faculty"><span class="ms s">menu_book</span>Faculty</button>
+            <button type="button" data-role="admin"><span class="ms s">admin_panel_settings</span>Admin</button>
+          </div>
+        </div>
+        <form id="loginForm" novalidate>
+          <div class="fld"><label for="name">Full Name</label><div class="inw"><span class="ms">person</span><input id="name" name="name" type="text" placeholder="e.g., Aarav Sharma" autocomplete="name" required></div></div>
+          <div class="fld"><label for="email">Institutional Email</label><div class="inw"><span class="ms">alternate_email</span><input id="email" name="email" type="email" placeholder="e.g., student@campus.edu" autocomplete="email" required></div></div>
+          <div class="fld"><label for="phone">Phone Number</label><div class="inw"><span class="ms">call</span><input id="phone" name="phone" type="tel" placeholder="e.g., +91 98765 43210" autocomplete="tel" required></div></div>
+          <div class="row between" style="padding-top:16px;font-size:14px;font-weight:600;letter-spacing:.14px">
+            <label class="row gap8" style="cursor:pointer"><input type="checkbox" style="width:16px;height:16px">Remember this device</label>
+            <a style="color:var(--green)" href="#">Forgot password?</a>
+          </div>
+          <button class="cta" id="submitBtn" type="submit"><span class="ms s">login</span>Sign In to Notice Board</button>
+          <div class="msg" id="formMsg" role="status"></div>
+        </form>
+        <div class="reg">Student registration<span class="ms xs">arrow_forward</span></div>
+      </div>
+    </div>
+  </main>
+  <footer class="lg-foot">© 2024 Smart Notice Board System. Campus Information Network.</footer>
+</section>
+
+<!-- ================= STUDENT ================= -->
+<section id="student" class="view dash" data-role="student">
+  <div class="dmain"><div class="ctr">
+    <div class="sh">
+      <div>
+        <div class="meta"><span class="pill">VERIFIED STUDENT PORTAL</span><span class="row gap4"><span class="dot"></span>Live Campus Sync</span></div>
+        <h1>Welcome back, Student</h1>
+        <p>Computer Science &amp; Engineering • Class of 2026</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="ms" style="color:var(--green)">mark_email_unread</span><div><span class="lbl">UNREAD</span><b>4</b></div></div>
+        <div class="stat"><span class="ms" style="color:var(--red)">priority_high</span><div><span class="lbl">URGENT</span><b style="color:var(--red)">2 Active</b></div></div>
+        <div class="stat"><span class="ms">event</span><div><span class="lbl">TODAY</span><b>1 Deadline</b></div></div>
+      </div>
+    </div>
+
+    <div class="urgent">
+      <div class="glow" style="background:rgba(255,218,214,.3);width:176px;height:176px;right:-32px;top:-32px;filter:blur(20px)"></div>
+      <div class="row gap16" style="align-items:flex-start;position:relative;flex:1;min-width:280px">
+        <div class="ic"><span class="ms l">campaign</span></div>
+        <div>
+          <div class="row gap4" style="flex-wrap:wrap"><span class="pill" style="background:rgba(186,26,26,.1);color:var(--red);gap:6px"><span class="dot r" style="width:8px;height:8px"></span>URGENT BROADCAST</span><small style="font-size:12px;font-weight:600;letter-spacing:.24px">Controller of Examinations</small><small style="font-size:12px;font-weight:600;letter-spacing:.24px">• Published Today, 08:30 AM</small></div>
+          <h2>2025 Mid-Semester Exam Schedule Released • Strict Seating Guidelines</h2>
+          <p>The Office of the Academic Dean and Examinations Controller has finalized timetable allocations for B.Tech semesters III, V, and VII. Hall tickets and slot…</p>
+        </div>
+      </div>
+      <div class="row gap8" style="position:relative"><button class="btn dk"><span class="ms s">download</span>Download PDF Schedule</button><button class="btn lt" style="padding:10px"><span class="ms">check_circle</span></button></div>
+    </div>
+
+    <div class="tabbar">
+      <div class="tabrow">
+        <div class="row gap4" id="stTabs">
+          <button class="tab on">All Notices <span class="cnt">48</span></button>
+          <button class="tab u"><span class="ms s" style="color:var(--red)">priority_high</span>Urgent Notices <span class="cnt">3</span></button>
+          <button class="tab"><span class="ms s">apartment</span>My Department (CSE) <span class="cnt">12</span></button>
+          <button class="tab n"><span class="ms s">notifications</span>Notifications <span class="cnt">4</span></button>
+        </div>
+        <div class="row gap8">
+          <div class="card row" style="padding:4px"><button class="ib" style="background:var(--s3)"><span class="ms s">grid_view</span></button><button class="ib"><span class="ms s">view_list</span></button></div>
+          <button class="card row gap4" style="padding:8px 12px;font-size:13px">Sort by: <b style="color:var(--dark);font-size:14px">Latest First</b><span class="ms s">expand_more</span></button>
+        </div>
+      </div>
+      <div class="chips" id="chips">
+        <span style="font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;padding-right:8px;white-space:nowrap">FILTER TOPICS:</span>
+        <button class="chip on">All</button><button class="chip">Academic</button><button class="chip">Examination</button><button class="chip">Sports</button><button class="chip">Events</button><button class="chip">Club &amp; Cultural</button><button class="chip">Placements</button>
+      </div>
+    </div>
+
+    <div class="grid12">
+      <div class="l8">
+        <div class="card nstat"><div class="row gap8"><span class="dot" style="width:10px;height:10px"></span><b style="font-size:16px;color:var(--dark);font-weight:600">All Active Notices</b><span style="font-size:13px">• Showing 6 prioritized bulletins</span></div><span class="row gap4" style="font-size:12px;font-weight:600"><span class="ms xs">filter_list</span>Applied: <b style="font-weight:800">Active Term 2025-26</b></span></div>
+        <div class="ncards" id="ncards"></div>
+        <div class="card pg"><span>Showing <b>1 – 6</b> of 48 notices</span><div class="nums"><button style="background:var(--s2);opacity:.4" class="ib"><span class="ms s">chevron_left</span></button><button class="on">1</button><button>2</button><button>3</button><button style="background:var(--s2)" class="ib"><span class="ms s">chevron_right</span></button></div></div>
+      </div>
+      <div class="r4">
+        <div class="card panel"><div class="ph"><h2><span class="ms" style="color:var(--red)">campaign</span>Urgent Alerts</h2><span class="pill red sm">LIVE STREAM</span></div>
+          <div class="flash"><div class="t"><span>ACADEMIC EXPIRY</span><span>18m ago</span></div><h4>Today the class will open at 8:45 PM</h4><p>No further changes in the class Distributed Systems or Electives will be accepted past at 8:55</p></div>
+          <div class="flash"><div class="t"><span>FINANCIAL NOTICE</span><span>2h ago</span></div><h4>Semester Fee Verification Receipt Portal Lockdown</h4><p>Ensure bank challans or RTGS receipt numbers are uploaded before late fines apply on Nov 01.</p></div></div>
+        <div class="card panel"><div class="ph"><h2><span class="ms" style="color:var(--green)">apartment</span>My Department (CS)</h2><span style="font-size:11px;font-weight:700;color:var(--green);letter-spacing:.44px">SEM 5</span></div>
+          <div class="dn"><div class="t"><span>CS LAB-4 NOTICE</span><span>Today</span></div><h4>Operating Systems Lab Exam Slot Revision: Batch B3 &amp; B4</h4><p>Prof. R. Sengupta • Lab complex 2nd floor</p></div>
+          <div class="dn"><div class="t"><span>INTERNSHIP DRIVE</span><span>Yesterday</span></div><h4>Summer Research Internships at IISc / TIFR Lab Submissions</h4><p>Dept. Research Committee</p></div>
+          <div class="dn"><div class="t"><span>GUEST LECTURE</span><span>Oct 21</span></div><h4>Industry Tech Talk: Building Ultra-Reliable Microservices in Rust</h4><p>Auditorium Hall 2 • 03:00 PM</p></div>
+          <button class="btn lt" style="width:100%;font-size:14px;margin-top:4px">View All 12 CSE Notices<span class="ms xs">arrow_forward</span></button></div>
+        <div class="card panel"><div class="ph"><h2><span class="ms" style="color:var(--green)">notifications</span>Recent Notifications</h2><button style="font-size:11px;font-weight:700;color:var(--green);letter-spacing:.44px;line-height:14px;text-align:center">MARK ALL READ</button></div>
+          <div class="notif"><i></i><div><h4>Assignment 3 Grade Published</h4><p>CS-504: Database Internals score posted by TA.</p><small>10m ago</small></div></div>
+          <div class="notif"><i></i><div><h4>Hackathon Team Registration Confirmed</h4><p>Slot #44 confirmed for Team 'BitShift'.</p><small>2h ago</small></div></div>
+          <div class="notif rd2"><i></i><div><h4 style="font-weight:600">Library Overdue Reminder Cleared</h4><p>Returned 'Introduction to Algorithms (4th Ed)'.</p><small>1d ago</small></div></div>
+          <div class="notif rd2"><i></i><div><h4 style="font-weight:600">Bus Route 7 Schedule Modification</h4><p>Campus transport shift begins Monday morning.</p><small>2d ago</small></div></div></div>
+        <div class="help"><div class="row between"><span class="ms l" style="color:var(--mint)">support_agent</span><span style="background:rgba(217,227,246,.2);color:var(--mint);font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.44px">HELPDESK</span></div>
+          <h4 style="padding-top:4px">Need notice clarification?</h4><p>Contact Student Support Cell at desk 4B, Central Block, or call the 24/7 hotline directly.</p>
+          <div class="row between" style="padding-top:12px"><b style="color:var(--mint);font-size:14px;letter-spacing:.14px">ext. 4092 / 4093</b><button style="background:#fff;color:var(--dark);font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px">Raise Query</button></div></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ================= FACULTY ================= -->
+<section id="faculty" class="view dash" data-role="faculty">
+  <div class="dmain"><div class="ctr">
+    <div style="padding-bottom:24px">
+      <div class="eyebrow row gap4" style="margin-top:8px"><span class="ms s">verified</span>VERIFIED FACULTY SESSION</div>
+      <h1 style="font-size:24px;line-height:32px;letter-spacing:-.6px;padding-top:4px">Welcome, Sir/Madam</h1>
+      <p>Associate Professor, Department of Computer Science &amp; Engineering</p>
+      <div class="fstats">
+        <div class="card fs"><div class="row between"><span class="lbl">ACTIVE NOTICES</span><span class="ms" style="color:var(--green)">campaign</span></div><div class="v"><b>8</b><small>+2 this week</small></div></div>
+        <div class="card fs"><div class="row between"><span class="lbl">SCHEDULED</span><span class="ms">event_upcoming</span></div><div class="v"><b>3</b><small class="n">Pending queue</small></div></div>
+        <div class="card fs"><div class="row between"><span class="lbl">DRAFTS</span><span class="ms">draft</span></div><div class="v"><b>2</b><small class="n">Saved locally</small></div></div>
+        <div class="card fs"><div class="row between"><span class="lbl">TOTAL VIEWS</span><span class="ms">visibility</span></div><div class="v"><b>1,420</b><small>↑ 18.4% engagement</small></div></div>
+      </div>
+    </div>
+    <div class="grid12">
+      <div class="l7">
+        <div class="card" style="padding:0 24px 24px">
+          <div class="fhead"><div class="row gap8"><div class="fico"><span class="ms s">edit_note</span></div><div><h2>Create Departmental Notice</h2><p>Broadcast instant notifications or schedule terminal relays</p></div></div><span class="chip2">STANDARD EDITOR</span></div>
+          <form class="fform" id="noticeForm" style="margin-top:16px" onsubmit="return false">
+            <div class="ff"><label for="nt_title"><span>Notice Title <span class="req">*</span></span><span style="font-size:11px;font-weight:400;color:var(--mut)" id="cnt">0/120</span></label><input id="nt_title" type="text" maxlength="120" placeholder="e.g., Guest Lecture on Distributed Systems by Dr. Aris Thorne"></div>
+            <div class="two">
+              <div class="ff"><label>Category <span class="req">*</span></label><div class="sel"><select><option>Academic Announcements</option><option>Examination</option><option>Events</option><option>Placement</option></select><span class="ms s">expand_more</span></div></div>
+              <div class="ff"><label>Origin Department <span class="req">*</span></label><div class="sel"><select><option>Computer Science &amp; Engineering</option><option>Electronics &amp; Comm</option><option>Mechanical Engineering</option></select><span class="ms s">apartment</span></div></div>
+            </div>
+            <div class="ff"><div class="lb">Target Audience</div><div class="opts" data-single><button type="button" class="on">All Students</button><button type="button">Undergraduate</button><button type="button">Postgraduate</button><button type="button">Faculty Only</button></div></div>
+            <div class="ff"><div class="lb">Transmission Priority</div><div class="opts p" data-single>
+              <button type="button" class="on"><span class="dot" style="width:10px;height:10px"></span><span>Normal<small>Standard queue</small></span></button>
+              <button type="button"><span class="dot" style="width:10px;height:10px;background:#3e665c"></span><span>High<small>Pinned on displays</small></span></button>
+              <button type="button"><span class="dot r" style="width:10px;height:10px"></span><span>Urgent Alert<small>Immediate broadcast</small></span></button></div></div>
+            <div class="ff"><div class="lb"><span>Notice Body Content</span><span class="tb"><span class="ms xs">format_bold</span><span class="ms xs">format_italic</span><span class="ms xs">format_list_bulleted</span><span class="ms xs">link</span><span class="ms xs">code</span></span></div>
+              <textarea>All Final Year (B.Tech CSE) students are hereby notified that an intensive workshop and guest symposium on "Scalable Distributed Consensus &amp; Raft Protocols" has been organized with visiting fellow Dr. Aris Thorne. Attendance is mandatory for registered distributed systems cohorts.</textarea></div>
+            <div class="ff"><div class="lb">Supporting Materials &amp; Attachments</div>
+              <div class="att"><div class="file"><div class="row gap8"><div class="fi"><span class="ms s">picture_as_pdf</span></div><div><b style="font-size:14px;color:var(--dark);display:block;line-height:20px;letter-spacing:.14px">distributed_consensus_syllabus_v2.pdf</b><small class="mono" style="font-size:11px;letter-spacing:.44px;line-height:14px">1.8 MB · Uploaded just now</small></div></div><button type="button" class="ib" onclick="this.closest('.file').remove()"><span class="ms s">close</span></button></div>
+              <div class="drop"><span class="ms l">cloud_upload</span>Drop additional PDF, PNG, or schedule briefs (Max 15MB)</div></div></div>
+            <div class="sched"><div class="row gap8"><span class="ms l" style="color:var(--green)">schedule_send</span><div><b style="font-size:14px;color:var(--dark);display:block;line-height:20px;letter-spacing:.14px">Schedule for Future Broadcast</b><small style="font-size:11px;font-weight:700;letter-spacing:.44px;line-height:14px;display:block">Delay display activation until specific timestamp</small></div></div><button type="button" class="sw" id="sw" aria-label="Schedule toggle"></button></div>
+            <div class="acts"><button type="button" class="btn" style="color:var(--txt)">Cancel</button><div class="row gap8"><button type="button" class="btn lt"><span class="ms s">bookmark</span>Save as Draft</button><button type="button" class="btn dk" style="padding:8px 24px"><span class="ms s">send</span>Publish Now</button></div></div>
+          </form>
+        </div>
+        <div class="spot"><div class="c"><span class="ms l">cast</span></div><div><h4>Live Display Sync Protocol</h4><p>Notices marked with High or Urgent priority propagate automatically to 14 high-density hallway kiosks in under 4 seconds.</p></div></div>
+      </div>
+
+      <div class="r5">
+        <div class="card mh">
+          <div class="row between" style="gap:8px"><div><h3 style="font-size:16px;line-height:24px;color:var(--dark);letter-spacing:-.08px">My Notices &amp; History</h3><p style="font-size:13px;line-height:20px">Real-time status of managed broadcasts</p></div><div class="seg" id="seg"><button class="on">Recent</button><button>Archived</button></div></div>
+          <div class="sinp"><span class="ms">search</span><input placeholder="Search notice archive..."></div>
+          <div class="nt"><div class="top"><div class="row gap4"><span class="pill red sm"><span class="dot r"></span>URGENT</span><span class="pill sm" style="color:#005140">ACADEMIC</span></div><span class="mono row gap4"><span class="ms s">visibility</span>482 views</span></div><h4>Mid-Semester Distributed Systems Lab…</h4><p>All slots previously scheduled for Lab-302 have been moved to Turing Block High Performance Computing</p><div class="f"><span class="row gap4"><span class="ms s" style="color:var(--green)">check_circle</span>Published 2h ago</span><span class="row"><button class="ib"><span class="ms s">edit</span></button><button class="ib"><span class="ms s">content_copy</span></button><button class="ib"><span class="ms s">delete</span></button></span></div></div>
+          <div class="nt"><div class="top"><div class="row gap4"><span class="pill blue sm" style="background:var(--s2);color:var(--ink)"><span class="ms xs">schedule</span>SCHEDULED</span><span class="pill sage sm">WORKSHOP</span></div><span class="mono">Queue #1</span></div><h4>Guest Lecture on Distributed Systems by Dr.…</h4><p>Mandatory seminar for all Final Year CSE cohorts. Please review the pre-requisite reading materials…</p><div class="f"><span class="row gap4" style="color:var(--green)"><span class="ms s">event_available</span>Scheduled: Nov 2, 09:30 AM</span><span class="row"><button class="ib"><span class="ms s">edit</span></button><button class="ib"><span class="ms s">content_copy</span></button><button class="ib"><span class="ms s">delete</span></button></span></div></div>
+          <div class="nt"><div class="top"><div class="row gap4"><span class="pill blue sm">DRAFT</span><span class="pill sm" style="color:#005140">EXAMINATION</span></div><span style="color:var(--mut)">Unpublished</span></div><h4>Final Comprehensive Viva-Voce Assessment…</h4><p>Internal documentation for CSE faculty review panels before department broadcast release...</p><div class="f"><span class="row gap4"><span class="ms s">save</span>Modified yesterday</span><span class="row"><button class="ib"><span class="ms s">edit</span></button><button class="ib"><span class="ms s">content_copy</span></button><button class="ib"><span class="ms s">delete</span></button></span></div></div>
+          <div class="nt"><div class="top"><span class="pill sm" style="color:#005140">PLACEMENT</span><span class="mono row gap4"><span class="ms s">visibility</span>938 views</span></div><h4>Google Summer of Code Mentorship…</h4><p>Interested sophomores and pre-final year students can enroll in the departmental prep session this…</p><div class="f"><span class="row gap4"><span class="ms s">history</span>Published Oct 24, 2024</span><span class="row"><button class="ib"><span class="ms s">content_copy</span></button><button class="ib"><span class="ms s">delete</span></button></span></div></div>
+          <div class="hf"><span>Displaying 4 of 24 records</span><a>Open Complete History<span class="ms xs">arrow_forward</span></a></div>
+        </div>
+        <div class="card" style="padding:16px;height:222px;position:relative">
+          <div class="row between"><b class="row gap4" style="font-size:14px;color:var(--dark);letter-spacing:.14px"><span class="ms s">monitoring</span>Audience Footfall Velocity</b><span class="pill sm" style="color:var(--green);text-transform:none">Live Telemetry</span></div>
+          <p style="font-size:13px;line-height:20px">Scanned QR codes &amp; digital billboard sensor hits (Past 7 days)</p>
+          <svg viewBox="0 0 336 96" preserveAspectRatio="none" style="position:absolute;left:16px;right:16px;top:88px;width:calc(100% - 32px);height:96px"><defs><linearGradient id="fg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#136b56" stop-opacity=".25"/><stop offset="1" stop-color="#136b56" stop-opacity="0"/></linearGradient></defs><path d="M0 84 C40 82 60 66 100 62 S160 52 190 46 S240 38 260 40 S310 26 334 12 V96 H0Z" fill="url(#fg)"/><path d="M0 84 C40 82 60 66 100 62 S160 52 190 46 S240 38 260 40 S310 26 334 12" fill="none" stroke="#136b56" stroke-width="2"/><circle cx="334" cy="10" r="3.5" fill="#002921"/></svg>
+          <div class="row between mono" style="position:absolute;left:16px;right:16px;top:184px;padding-top:8px;font-size:11px;letter-spacing:.44px"><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span style="color:var(--dark)">SUN (PEAK)</span></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ================= ADMIN ================= -->
+<section id="admin" class="view dash" data-role="admin">
+  <div class="dmain"><div class="ctr">
+    <div class="top">
+      <div><div class="eyebrow row gap4"><span class="ms xs">shield</span>CENTRAL ACADEMIC ADMINISTRATION</div><h1 style="margin-top:4px">System Governance &amp; Controls</h1><p>Campus-wide notice moderation, role delegations, and faculty analytics overview</p></div>
+      <div class="col" style="align-items:flex-start"><span class="syn"><span class="dot" style="width:8px;height:8px"></span>Sync Active • Server Region US-East (Campus Core)</span><button class="btn dk"><span class="ms s">download</span>Export Ledger</button></div>
+    </div>
+
+    <div class="km">
+      <div class="card kc"><div class="row between" style="align-items:flex-start"><div><span class="lbl" style="letter-spacing:.44px">TOTAL NOTICES</span><div class="big">348</div></div><div class="ico"><span class="ms">campaign</span></div></div><div class="row between ft"><span class="row gap4"><span class="ms s">trending_up</span>+12% this month</span><span class="n">42 scheduled</span></div></div>
+      <div class="card kc"><div class="row between" style="align-items:flex-start"><div><span class="lbl" style="letter-spacing:.44px">ACTIVE DIRECTORY</span><div class="big">4,892</div></div><div class="ico"><span class="ms">group</span></div></div><div class="ft" style="gap:8px;color:var(--ink);font-size:12px"><span><b>4,520</b><br><span class="n" style="font-weight:400;font-size:11px">Stu</span></span>•<span><b>340</b><br><span style="font-weight:400;font-size:11px">Fac</span></span>•<span><b>32</b><br><span style="font-weight:400;font-size:11px">Adm</span></span></div></div>
+      <div class="card kc"><div class="row between" style="align-items:flex-start"><div><span class="lbl" style="letter-spacing:.44px">ACADEMIC DEPTS</span><div class="big">14</div></div><div class="ico"><span class="ms">account_balance</span></div></div><div class="row between ft"><span class="row gap4"><span class="dot"></span>100% Operational</span><span class="n">2 awaiting audit</span></div></div>
+      <div class="card kc red"><div class="blob"></div><div class="row between" style="align-items:flex-start;position:relative"><div><span class="lbl" style="letter-spacing:.44px">URGENT<br>BROADCASTS</span><div class="big">3</div></div><div class="ico" style="background:var(--redbg);color:var(--red)"><span class="ms">emergency</span></div></div><div class="row between ft" style="position:relative"><span class="pill red" style="gap:6px"><span class="dot r"></span>LIVE TICKER</span><span class="n">Across 28 screens</span></div></div>
+    </div>
+
+    <div class="mh2"><div><div class="k">MODULE 01 <span>• Performance &amp; Engagement</span></div><h2>Analytics &amp; Publishing Velocity</h2></div><div class="row gap8" style="font-size:12px;font-weight:600"><span>Timeframe:</span><button class="card" style="padding:4px 12px;font-weight:700;color:var(--dark)">Past 30 Days</button></div></div>
+    <div class="an" style="margin-bottom:40px">
+      <div class="ac"><div><h3>Notices by Department <span>CSE Leading</span></h3><p>Volume distribution across top publishing faculties</p>
+        <div class="bar"><div><span>Computer Science &amp; Eng (CSE)</span><b>114 notices</b></div><i><s style="width:100%;background:var(--deep)"></s></i></div>
+        <div class="bar"><div><span>Electronics &amp; Comm (ECE)</span><b>78 notices</b></div><i><s style="width:68%;background:var(--green)"></s></i></div>
+        <div class="bar"><div><span>Dean of Students Office</span><b>64 notices</b></div><i><s style="width:56%;background:#3e665c"></s></i></div>
+        <div class="bar"><div><span>Mechanical Engineering</span><b>52 notices</b></div><i><s style="width:46%;background:#80d6bd"></s></i></div>
+        <div class="bar"><div><span>Physics &amp; Material Sci</span><b>40 notices</b></div><i><s style="width:35%;background:#c0c8c4"></s></i></div></div>
+        <div class="sm2"><b>Digital Board Reach</b><b>98.4% Uptime</b></div></div>
+      <div class="ac"><div><h3>Notice Publication Velocity <span class="row gap4" style="font-weight:600;letter-spacing:.24px;font-size:12px"><span class="dot"></span>7-Day Moving Avg</span></h3><p>Daily issuance frequency during current term examination phase</p>
+        <svg viewBox="0 0 336 190" style="width:100%;height:auto;margin-top:12px" role="img" aria-label="Publication trend"><defs><linearGradient id="ag" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3e665c" stop-opacity=".3"/><stop offset="1" stop-color="#3e665c" stop-opacity="0"/></linearGradient></defs><path d="M8 120 C50 108 70 112 100 108 S150 66 184 66 S230 112 258 80 S300 70 328 46 V176 H8Z" fill="url(#ag)"/><path d="M8 120 C50 108 70 112 100 108 S150 66 184 66 S230 112 258 80 S300 70 328 46" fill="none" stroke="#002921" stroke-width="2"/><g fill="#002921"><circle cx="8" cy="120" r="3"/><circle cx="100" cy="108" r="3"/><circle cx="184" cy="66" r="3.5"/><circle cx="260" cy="80" r="3"/><circle cx="328" cy="46" r="4"/></g></svg>
+        <div class="row between" style="font-size:12px;font-weight:600;padding-top:8px"><span>Week 01</span><span>Week 02</span><span>Week 03</span><span>Week 04</span><span>Current</span></div></div>
+        <div class="two2"><div><small>PEAK BROADCAST DAY</small><b>Thursday</b><span>Avg 18 notices / day</span></div><div><small>NOTICE RETENTION RATE</small><b>91.2%</b><span>Read within 4 hrs</span></div></div></div>
+      <div class="ac"><div><h3>User Demographics</h3><p>Role segmentation &amp; portal adoption</p>
+        <div class="meter" style="margin-top:12px"><div class="t"><span>Undergrad &amp; Grad</span><b>92.4%</b></div><i><s style="width:92.4%"></s></i><small>4,520 of 4,892 accounts</small></div>
+        <div class="meter"><div class="t"><span>Faculty / Lecturers</span><b style="color:var(--green)">6.9%</b></div><i><s style="width:7%;background:var(--green)"></s></i><small>340 active staff publishers</small></div>
+        <div class="meter"><div class="t"><span>Department Admins</span><b>0.7%</b></div><i><s style="width:2%"></s></i><small>32 privileged controllers</small></div></div>
+        <div class="row gap8" style="font-size:12px;font-weight:600"><span class="row gap4" style="color:var(--green)"><span class="ms s">verified_user</span>SSO Verified</span><span>Google Workspace Sync</span></div></div>
+    </div>
+
+    <div class="mod">
+      <div class="mh2" style="margin-bottom:0"><div><div class="k">MODULE 02 <span>• Access Control &amp; Roster</span></div><h2 style="font-size:24px;line-height:32px">User Directory &amp; Role Governance</h2></div>
+        <div class="col" style="gap:8px;align-items:flex-end"><div class="ctl"><div class="si"><span class="ms">search</span><input placeholder="Search by name, netID or email..."></div><div class="pills" id="rolePills"><button class="on">All</button><button>Faculty</button><button>Students</button><button>Admins</button></div></div><button class="btn dk" style="align-self:flex-start"><span class="ms s">person_add</span>Add New User</button></div></div>
+      <div class="tw"><table id="users"><thead><tr><th>User Identity</th><th>Email</th><th>Role</th><th>Department</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+      <div class="tf"><span>Showing 4 of 4,892 verified users</span><div class="row gap8"><button>Previous</button><b style="font-size:12px">1 of 122</b><button>Next</button></div></div>
+    </div>
+
+    <div class="mh2"><div><div class="k">MODULE 03 <span>• Organizational Units</span></div><h2>Department Directory &amp; Quotas</h2></div><button class="card btn" style="color:var(--dark);font-weight:700"><span class="ms s">domain_add</span>Add Department</button></div>
+    <div class="depts" style="margin-bottom:40px">
+      <div class="dc"><div><div class="row between"><span class="pill sm">CSE-101</span><span class="row gap4" style="font-size:11px;font-weight:700;color:var(--green)"><span class="dot"></span>Active</span></div><h3>Computer Science &amp; Eng</h3><p>Head: Prof. Marcus Thorne</p></div><div class="f"><span>Notices: 114</span><a>Manage<span class="ms xs">arrow_forward</span></a></div></div>
+      <div class="dc"><div><div class="row between"><span class="pill sm">ECE-102</span><span class="row gap4" style="font-size:11px;font-weight:700;color:var(--green)"><span class="dot"></span>Active</span></div><h3>Electronics &amp; Comm</h3><p>Head: Dr. Aris Thornefield</p></div><div class="f"><span>Notices: 78</span><a>Manage<span class="ms xs">arrow_forward</span></a></div></div>
+      <div class="dc"><div><div class="row between"><span class="pill sm">MECH-204</span><span class="row gap4" style="font-size:11px;font-weight:700;color:var(--green)"><span class="dot"></span>Active</span></div><h3>Mechanical Engineering</h3><p>Head: Prof. Clara Oswald</p></div><div class="f"><span>Notices: 52</span><a>Manage<span class="ms xs">arrow_forward</span></a></div></div>
+      <div class="dc add"><div><div class="p"><span class="ms s">add</span></div><h3 style="margin:0">Register Department</h3><p style="margin-top:4px">Provision code, assign Faculty Head &amp; quotas</p></div></div>
+    </div>
+
+    <div class="mod">
+      <div class="mh2"><div><div class="k">MODULE 04 <span>• Moderation &amp; Broadcast Queues</span></div><h2 style="font-size:24px;line-height:32px">Master Notices Oversight</h2></div>
+        <div class="row gap8"><span class="pill blue" style="background:var(--s1);text-transform:none;font-size:12px;letter-spacing:.24px;padding:6px 12px"><span class="ms xs">filter_list</span>Priority: All</span><span class="pill blue" style="background:var(--s1);text-transform:none;font-size:12px;letter-spacing:.24px;padding:6px 12px">Status: Published</span></div></div>
+      <div class="tw" style="margin-top:0"><table id="notices"><thead><tr><th style="min-width:300px">Notice Subject &amp; Snippet</th><th>Author</th><th>Dept</th><th>Priority</th><th>Date Issued</th><th>State</th><th>More</th></tr></thead><tbody></tbody></table></div>
+      <div class="tf"><span>Displaying latest platform notices across active boards</span><a class="arch">Open Full Notice Archive<span class="ms xs">arrow_forward</span></a></div>
+    </div>
+  </div></div>
+</section>
+
+<script>
+/* ===== CONFIG ===== */
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAzgxn4rGDLX1640WAIp7ncUeU-fdsenkpr8RVxZBYnLtj7HnnMcskR6A_Qmmzaqtc4A/exec";
+
+/* ===== shell (sidebar + header) per role ===== */
+var LOGO = "https://www.figma.com/api/mcp/asset/ea440a77-2862-4732-b247-0ff71db7440e/00d1a.png";
+var PROFILE = "https://www.figma.com/api/mcp/asset/b2299b81-758a-4802-b1fc-0848e71375a7/e9968.png";
+var ROLES = {
+  student:{sec:"STUDENT NAVIGATION",nav:["All Notices","Urgent Notices","My Department","Notifications"],title:null,who:["Student Portal","Active Session"],bell:""},
+  faculty:{sec:"FACULTY PORTAL",nav:["Create Notice","My Notices","Schedule Notice","Notice History"],title:"Faculty Dashboard",who:["Faculty Member","Department Staff"],bell:"g"},
+  admin:{sec:"SYSTEM ADMINISTRATION",nav:["Users","Departments","Notices","Analytics"],title:"Admin Dashboard",who:["Admin",""],bell:""}
+};
+Object.keys(ROLES).forEach(function(k){
+  var r=ROLES[k], el=document.getElementById(k);
+  var nav=r.nav.map(function(n,i){return '<a class="'+(i===0?'on':'')+'">'+n+'</a>';}).join("");
+  var left = r.title ? '<b style="font-size:16px;color:var(--dark);letter-spacing:-.08px">'+r.title+'</b>'
+    : '<div class="hsearch"><span class="ms">search</span><input placeholder="Search announcements, faculties, keywords..."></div>';
+  var html = '<aside class="aside"><div><div class="brand"><img alt="" src="'+LOGO+'" style="height:32px" onerror="this.style.display=\'none\'"><b>Smart Notice</b></div><div class="sec lbl">'+r.sec+'</div><nav>'+nav+'</nav></div><div class="out"><a data-logout>Logout</a></div></aside>'+
+  '<header class="hdr">'+left+'<div class="hr"><button class="bell '+r.bell+'"><span class="ms">'+(k==="admin"?"admin_panel_settings":"notifications")+'</span>'+(k==="admin"?"":"<i></i>")+'</button><div class="row gap8"><div class="who">'+r.who[0]+(r.who[1]?'<small>'+r.who[1]+'</small>':'')+'</div><img class="av" alt="" src="'+PROFILE+'"><span class="ms s">expand_more</span></div></div></header>';
+  el.insertAdjacentHTML("afterbegin",html);
+});
+
+/* ===== student cards ===== */
+var P="https://www.figma.com/api/mcp/asset/b2299b81-758a-4802-b1fc-0848e71375a7/";
+var CARDS=[
+ ["COMPUTER SCIENCE & ENG","Oct 24, 2025","Technical Event","Annual Inter-College Hackathon 2025 Registration","Teams of 3 to 4 undergraduates are invited to submit solution briefs…","Prof. Sarah Jenkins","HOD • CSE Labs",P+"d7212.png"],
+ ["CENTRAL LIBRARY","Oct 22, 2025","Academic","Library Hours Extended for End-Semester Prep","Starting this Monday, the Central Reading Hall and digital reference…","Dr. Robert Vance","Chief Dean of Libraries",P+"fdffb.png"],
+ ["PLACEMENT CELL","Oct 20, 2025","Career","Campus Placement Drive: CloudCore Technologies","Eligible pre-final & final year students from CS, IT, and ECE with a CGPA >= 7.5","Placement Officer","Industry Outreach Office","PO|#153f36|#fff"],
+ ["ELECTRICAL & ELECTRONICS","Oct 19, 2025","Workshop","Robotics Workshop: Embedded Systems & ROS2","A weekend hands-on boot camp covering hardware abstraction layers,…","Dr. Priya Sharma","Mechatronics Center Lead",P+"5d2b5.png"],
+ ["PHYSICAL EDUCATION","Oct 18, 2025","Sports","Inter-Department Sports Meet Fixtures","Football, Basketball, Badminton, and Track event draws have been posted on…","Coach David Miller","Director of Athletics","DM|#d9e3f6|#121c2a"],
+ ["CAMPUS ADMINISTRATION","Oct 17, 2025","General","Hostel Maintenance & WiFi Upgrade Notice","Routine access-point firmware upgrade across North and South…","Admin Affairs","Estate Services Wing","AA|#002921|#fff"]
+];
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+document.getElementById("ncards").innerHTML=CARDS.map(function(c){
+  var av = c[7].indexOf("|")>-1 ? (function(p){p=p.split("|");return '<span class="ini" style="background:'+p[1]+';color:'+p[2]+'">'+p[0]+'</span>';})(c[7]) : '<img class="ini" alt="" src="'+c[7]+'">';
+  return '<article class="card ncard"><div><div class="row between" style="align-items:flex-start"><span class="pill">'+esc(c[0])+'</span><span style="font-size:13px;line-height:20px">'+c[1]+'</span></div><span class="tag">'+c[2]+'</span><h3>'+esc(c[3])+'</h3><p>'+esc(c[4])+'</p></div>'+
+  '<div class="nfoot"><div class="row gap8" style="min-width:0">'+av+'<div class="who2">'+c[5]+'<small>'+c[6]+'</small></div></div><div class="row gap4"><button class="ib"><span class="ms s">bookmark_border</span></button><button class="rd">Read Details</button></div></div></article>';
+}).join("");
+
+/* ===== admin tables ===== */
+var USERS=[
+ ["Dr. Eleanor Vance","UID: 9028-AD","e.vance@campus.edu",'<span class="pill dk sm">SUPERADMIN</span>',"Provost / General Admin",'<span class="pill sm" style="text-transform:none;letter-spacing:.24px"><span class="dot"></span>Active</span>',"EV","#d9e3f6"],
+ ["Prof. Marcus Thorne","UID: 4410-FC","m.thorne@campus.edu",'<span class="pill sm" style="border-radius:9999px">FACULTY HEAD</span>',"Computer Science & Eng",'<span class="pill sm" style="text-transform:none;letter-spacing:.24px"><span class="dot"></span>Active</span>',"MT","#c0c8c4"],
+ ["Aaliyah Chen","UID: 8831-ST","a.chen24@student.edu",'<span class="pill blue sm">STUDENT REP</span>',"Student Senate / ECE",'<span class="pill sm" style="text-transform:none;letter-spacing:.24px"><span class="dot"></span>Active</span>',"AC","#a3f2d8"],
+ ["Dr. Devendra Kumar","UID: 5129-FC","d.kumar@campus.edu",'<span class="pill sm">FACULTY</span>',"Physics & Material Sci",'<span class="pill blue sm" style="text-transform:none;letter-spacing:.24px;background:var(--s3)"><span class="dot" style="background:var(--txt)"></span>Pending SSO</span>',"DK","#dee9fc"]
+];
+document.querySelector("#users tbody").innerHTML=USERS.map(function(u,i){
+  var acts = i===3 ? '<span class="ms s">check</span><span class="ms s">edit</span><span class="ms s">delete</span>' : '<span class="ms s">edit</span><span class="ms s">key</span><span class="ms s">block</span>';
+  return '<tr><td class="u"><span class="ini" style="background:'+u[7]+';color:var(--dark);width:36px;height:36px">'+u[6]+'</span><div><b>'+u[0]+'</b><small>'+u[1]+'</small></div></td><td>'+u[2]+'</td><td>'+u[3]+'</td><td>'+u[4].replace(/&/g,"&amp;")+'</td><td>'+u[5]+'</td><td><span class="row" style="gap:12px;justify-content:center;color:var(--txt)">'+acts+'</span></td></tr>';
+}).join("");
+var NOTICES=[
+ ["push_pin","Campus Severe Weather Alert • Classes Moved Remote","Due to torrential rain warnings, all afternoon labs conducted online…","Campus Safety Dept.","CENTRAL",'<span class="pill red sm"><span class="dot r"></span>URGENT</span>',"Today, 07:15 AM",'<span class="row gap4" style="font-weight:700;color:var(--green)"><span class="dot"></span>Broadcasting</span>'],
+ ["article","Spring 2025 Mid-Semester Examination Schedule Published","Official room allocations and seating matrices available in the portal…","Dr. M. Thorne","CSE-101",'<span class="pill blue sm">NORMAL</span>',"Yesterday, 14:20",'<span class="row gap4" style="font-weight:700;color:var(--green)"><span class="dot"></span>Active</span>'],
+ ["article","Annual Robotics Symposium 2025 Registration Call","Inter-collegiate engineering teams can submit abstracts before Friday…","Dr. A. Thornefield","ECE-102",'<span class="pill blue sm">NORMAL</span>',"Feb 14, 2025",'<span class="row gap4" style="font-weight:700;color:var(--green)"><span class="dot"></span>Active</span>']
+];
+document.querySelector("#notices tbody").innerHTML=NOTICES.map(function(n){
+  return '<tr><td><div class="row gap8" style="align-items:flex-start"><span class="ms s" style="color:'+(n[0]==="push_pin"?"var(--red)":"var(--txt)")+';margin-top:2px">'+n[0]+'</span><div><b style="font-size:14px;line-height:20px;color:var(--ink)">'+n[1]+'</b><div style="font-size:13px;line-height:20px">'+n[2]+'</div></div></div></td><td>'+n[3]+'</td><td><span class="pill blue sm" style="text-transform:none;background:var(--s4)">'+n[4]+'</span></td><td>'+n[5]+'</td><td class="mono" style="font-size:12px">'+n[6]+'</td><td>'+n[7]+'</td><td><span class="row" style="gap:12px;color:var(--txt)"><span class="ms s">push_pin</span><span class="ms s">edit</span><span class="ms s">delete</span></span></td></tr>';
+}).join("");
+
+/* ===== small UI behaviours ===== */
+function single(sel){document.querySelectorAll(sel).forEach(function(g){g.addEventListener("click",function(e){var b=e.target.closest("button");if(!b||!g.contains(b))return;g.querySelectorAll("button").forEach(function(x){x.classList.remove("on")});b.classList.add("on");});});}
+single("[data-single]");single("#stTabs");single("#chips");single("#seg");single("#rolePills");
+document.getElementById("stTabs").addEventListener("click",function(e){var b=e.target.closest(".tab");if(!b)return;this.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on")});b.classList.add("on");});
+document.getElementById("sw").addEventListener("click",function(){this.classList.toggle("on")});
+document.getElementById("nt_title").addEventListener("input",function(){document.getElementById("cnt").textContent=this.value.length+"/120"});
+document.querySelectorAll(".aside nav").forEach(function(n){n.addEventListener("click",function(e){var a=e.target.closest("a");if(!a)return;n.querySelectorAll("a").forEach(function(x){x.classList.remove("on")});a.classList.add("on");});});
+
+/* ===== view switching ===== */
+function show(id){
+  document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active")});
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0,0);
+}
+document.querySelectorAll("[data-logout]").forEach(function(a){a.addEventListener("click",function(){show("login")})});
+
+/* ===== login: role switcher ===== */
+var role="student";
+var NAMES={student:"Student",faculty:"Faculty",admin:"Admin"};
+var PH={student:"e.g., student@campus.edu",faculty:"e.g., faculty@campus.edu",admin:"e.g., admin@campus.edu"};
+document.getElementById("roleTabs").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  role=b.getAttribute("data-role");
+  this.querySelectorAll("button").forEach(function(x){x.classList.remove("on")});b.classList.add("on");
+  document.getElementById("asRole").textContent="Logging in as "+NAMES[role];
+  document.getElementById("email").placeholder=PH[role];
+});
+
+/* ===== login: save to Google Sheets (GET + no-cors, works on file://) ===== */
+var form=document.getElementById("loginForm"), msg=document.getElementById("formMsg"), btn=document.getElementById("submitBtn");
+function showSuccess(){
+  msg.className="msg ok";msg.textContent="Saved! Opening your "+NAMES[role]+" dashboard…";
+  setTimeout(function(){btn.disabled=false;msg.className="msg";show(role);},900);
+}
+function showError(){
+  btn.disabled=false;msg.className="msg err";msg.textContent="Could not save your details. Check your internet connection and try again.";
+}
+form.addEventListener("submit",function(e){
+  e.preventDefault();
+  var name=document.getElementById("name").value.trim();
+  var email=document.getElementById("email").value.trim();
+  var phone=document.getElementById("phone").value.trim();
+  if(!name||!email||!phone){msg.className="msg err";msg.textContent="Please fill in your name, email and phone number.";return;}
+  if(!/^\S+@\S+\.\S+$/.test(email)){msg.className="msg err";msg.textContent="Please enter a valid email address.";return;}
+  btn.disabled=true;msg.className="msg";
+  var url = SCRIPT_URL + "?" + new URLSearchParams({name:name,email:email,phone:phone});
+  fetch(url,{method:"GET",mode:"no-cors"}).then(function(){showSuccess();}).catch(function(){showError();});
+});
+</script>
+</body>
+</html>
